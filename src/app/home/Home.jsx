@@ -1,4 +1,6 @@
 import ImageCropper from '@/components/ImageCropper';
+import BASE_URL from '@/config/BaseUrl';
+import axios from 'axios';
 import React, { useState } from 'react';
 
 
@@ -17,8 +19,7 @@ const Home = () => {
     mobile: '',
     email: '',
     website: '',
-    fax: '',
-    other: '',
+   
     profileImage: ''
   });
 
@@ -114,19 +115,89 @@ const Home = () => {
   };
   
 
-  const handleSubmit = () => {
+  // const handleSubmit = () => {
+  //   if (validateForm()) {
+  //     console.log("Form Data:", formData);
+  //     setAlertMessage("Registration submitted successfully! We will contact you soon.");
+  //     setAlertType('success');
+  //     setShowAlert(true);
+  //   } else {
+  //     setAlertMessage("Please fix the errors in the form before submitting.");
+  //     setAlertType('error');
+  //     setShowAlert(true);
+  //   }
+  // };
+  const handleSubmit = async () => {
     if (validateForm()) {
-      console.log("Form Data:", formData);
-      setAlertMessage("Registration submitted successfully! We will contact you soon.");
-      setAlertType('success');
-      setShowAlert(true);
+      try {
+        const form = new FormData();
+        form.append("fullname", formData.fullname);
+        form.append("totalFamily", formData.totalFamily);
+        form.append("gnati", formData.gnati);
+        form.append("age", formData.age);
+        form.append("gender", formData.gender);
+        form.append("category", formData.category);
+        form.append("address", formData.address);
+        form.append("pincode", formData.pincode);
+        form.append("telephone", formData.telephone);
+        form.append("mobile", formData.mobile);
+        form.append("email", formData.email);
+        form.append("website", formData.website);
+  
+
+        if (formData.profileImage) {
+       
+          if (formData.profileImage.startsWith("data:")) {
+            const res = await fetch(formData.profileImage);
+            const blob = await res.blob();
+            const file = new File([blob], "profile.jpg", { type: blob.type });
+            form.append("profileImage", file);
+          } else {
+            form.append("profileImage", formData.profileImage);
+          }
+        }
+  
+        const response = await axios.post(`${BASE_URL}/api/createWebenquiry`, form, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+  
+        console.log("API Response:", response.data);
+  
+        setAlertMessage("Registration submitted successfully! We will contact you soon.");
+        setAlertType("success");
+        setShowAlert(true);
+  
+
+        setFormData({
+          fullname: "",
+          totalFamily: "",
+          gnati: "",
+          age: "",
+          gender: "Male",
+          category: "Donor",
+          address: "",
+          pincode: "",
+          telephone: "",
+          mobile: "",
+          email: "",
+          website: "",
+          profileImage: "",
+        });
+  
+      } catch (error) {
+        console.error("API Error:", error);
+        setAlertMessage(error.response?.data?.message || "Something went wrong, please try again.");
+        setAlertType("error");
+        setShowAlert(true);
+      }
     } else {
       setAlertMessage("Please fix the errors in the form before submitting.");
-      setAlertType('error');
+      setAlertType("error");
       setShowAlert(true);
     }
   };
-
   const closeAlert = () => {
     setShowAlert(false);
   };
