@@ -1,3 +1,6 @@
-const BASE_URL = "https://southindiagarmentsassociation.com/public";
+const BASE_URL = "https://agsdemo.in/vsamajapi/public";
 
 export default BASE_URL;
+
+
+
