@@ -89,7 +89,7 @@ const Home = () => {
     const newErrors = {};
   
     if (!formData.fullname.trim()) newErrors.fullname = 'Full name is required';
-    if (!formData.age) newErrors.age = 'Age is required';
+    if (!formData.age) newErrors.age = 'DOB is required';
     if (!formData.gender) newErrors.gender = 'Gender is required';
     if (!formData.gnati.trim()) newErrors.gnati = 'Gnati is required';
     if (!formData.mobile) newErrors.mobile = 'Mobile number is required';
@@ -338,7 +338,7 @@ const Home = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-amber-800 mb-2">Age *</label>
+                    <label className="block text-sm font-medium text-amber-800 mb-2">DOB *</label>
                     <input
                       type="date"
                       name="age"
