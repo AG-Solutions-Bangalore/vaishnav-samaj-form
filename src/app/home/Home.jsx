@@ -286,7 +286,7 @@ const Home = () => {
                   <div>
                     <label className="block text-sm font-medium text-amber-800 mb-3">Category</label>
                     <div className="flex space-x-1">
-                      {["Donor", "Patron", "Life Membership"].map((category) => (
+                      {["Patron", "Dy Patron", "Life Membership"].map((category) => (
                         <button
                           key={category}
                           type="button"
@@ -389,7 +389,7 @@ const Home = () => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className='col-span-1 md:col-span-2'>
                     <label className="block text-sm font-medium text-amber-800 mb-2">Complete Address</label>
                     <textarea
@@ -444,7 +444,7 @@ const Home = () => {
 </div>
 
               
-                  <div className='flex flex-col gap-4'>
+                  {/* <div className='flex flex-col gap-4'>
                     <div>
                       <label className="block text-sm font-medium text-amber-800 mb-2">Pincode </label>
                       <input
@@ -457,7 +457,7 @@ const Home = () => {
                         className={`w-full px-4 py-3 border ${errors.pincode ? 'border-red-500' : 'border-gray-400/80'} rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors`}
                         required
                       />
-                      {/* {errors.pincode && <span className="text-xs text-red-500">{errors.pincode}</span>} */}
+              
                     </div>
 
                     <div>
@@ -471,7 +471,7 @@ const Home = () => {
                         className={`w-full px-4 py-3 border ${errors.totalFamily ? 'border-red-500' : 'border-gray-400/80'} rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors`}
                       />
                     </div>
-                  </div>
+                  </div> */}
                 </div>
 
                 {/* Image Upload Section */}
