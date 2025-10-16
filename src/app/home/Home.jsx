@@ -1,82 +1,89 @@
-import ImageCropper from '@/components/ImageCropper';
-import BASE_URL from '@/config/BaseUrl';
-import axios from 'axios';
-import React, { useState } from 'react';
-
-
+import ImageCropper from "@/components/ImageCropper";
+import BASE_URL from "@/config/BaseUrl";
+import axios from "axios";
+import React, { useState } from "react";
 
 const Home = () => {
   const [formData, setFormData] = useState({
-    fullname: '',
-    totalFamily: '',
-    gnati: '',
-    age: '',
-    gender: 'Male',
-    category: 'Donor',
-    address: '',
-    pincode: '',
-    telephone: '',
-    mobile: '',
-    email: '',
-    website: '',
-   
-    profileImage: ''
+    fullname: "",
+    totalFamily: "",
+    gnati: "",
+    dobDay: '',
+    dobMonth: '',
+    dobYear: '',
+
+    // age: "",
+    gender: "Male",
+    category: "Patron",
+    address: "",
+    pincode: "",
+    telephone: "",
+    mobile: "",
+    email: "",
+    website: "",
+
+    profileImage: "",
   });
 
   const [errors, setErrors] = useState({});
   const [showAlert, setShowAlert] = useState(false);
-  const [alertMessage, setAlertMessage] = useState('');
-  const [alertType, setAlertType] = useState(''); 
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertType, setAlertType] = useState("");
   const [showCropper, setShowCropper] = useState(false);
   const [tempImage, setTempImage] = useState(null);
 
   const keyDown = (e) => {
-    if ([8, 9, 27, 13, 46, 35, 36, 37, 38, 39, 40].indexOf(e.keyCode) !== -1 ||
-        (e.keyCode === 65 && e.ctrlKey === true) || 
-        (e.keyCode === 67 && e.ctrlKey === true) || 
-        (e.keyCode === 86 && e.ctrlKey === true) ||
-        (e.keyCode === 88 && e.ctrlKey === true)) {
+    if (
+      [8, 9, 27, 13, 46, 35, 36, 37, 38, 39, 40].indexOf(e.keyCode) !== -1 ||
+      (e.keyCode === 65 && e.ctrlKey === true) ||
+      (e.keyCode === 67 && e.ctrlKey === true) ||
+      (e.keyCode === 86 && e.ctrlKey === true) ||
+      (e.keyCode === 88 && e.ctrlKey === true)
+    ) {
       return;
     }
-  
-    if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
+
+    if (
+      (e.shiftKey || e.keyCode < 48 || e.keyCode > 57) &&
+      (e.keyCode < 96 || e.keyCode > 105)
+    ) {
       e.preventDefault();
     }
   };
-  
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prevState => ({
+    setFormData((prevState) => ({
       ...prevState,
-      [name]: value
+      [name]: value,
     }));
 
     if (errors[name]) {
-      setErrors(prevErrors => ({
+      setErrors((prevErrors) => ({
         ...prevErrors,
-        [name]: ''
+        [name]: "",
       }));
     }
   };
 
   const handleTabSelect = (field, value) => {
-    setFormData(prevState => ({
+    setFormData((prevState) => ({
       ...prevState,
-      [field]: value
+      [field]: value,
     }));
 
     if (errors[field]) {
-      setErrors(prevErrors => ({
+      setErrors((prevErrors) => ({
         ...prevErrors,
-        [field]: ''
+        [field]: "",
       }));
     }
   };
 
   const handleCropComplete = (croppedImage) => {
-    setFormData(prevState => ({
+    setFormData((prevState) => ({
       ...prevState,
-      profileImage: croppedImage
+      profileImage: croppedImage,
     }));
     setShowCropper(false);
   };
@@ -87,33 +94,34 @@ const Home = () => {
 
   const validateForm = () => {
     const newErrors = {};
-  
-    if (!formData.fullname.trim()) newErrors.fullname = 'Full name is required';
-    if (!formData.age) newErrors.age = 'DOB is required';
-    if (!formData.gender) newErrors.gender = 'Gender is required';
-    if (!formData.gnati.trim()) newErrors.gnati = 'Gnati is required';
-    if (!formData.mobile) newErrors.mobile = 'Mobile number is required';
-    if (!formData.email) newErrors.email = 'Email is required';
 
-    if (!formData.profileImage) newErrors.profileImage = 'Profile image is required';  
-  
+    if (!formData.fullname.trim()) newErrors.fullname = "Full name is required";
+    if (!formData.dobDay || !formData.dobMonth || !formData.dobYear) {
+      newErrors.age = "DOB is required";
+    }
+    
+    if (!formData.gender) newErrors.gender = "Gender is required";
+    if (!formData.gnati.trim()) newErrors.gnati = "Gnati is required";
+    if (!formData.mobile) newErrors.mobile = "Mobile number is required";
+    if (!formData.email) newErrors.email = "Email is required";
+
+    if (!formData.profileImage)
+      newErrors.profileImage = "Profile image is required";
+
     if (formData.mobile && !/^\d{10}$/.test(formData.mobile)) {
-      newErrors.mobile = 'Mobile number must be 10 digits';
+      newErrors.mobile = "Mobile number must be 10 digits";
     }
     if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Please enter a valid email address';
+      newErrors.email = "Please enter a valid email address";
     }
     if (formData.pincode && !/^\d{6}$/.test(formData.pincode)) {
-      newErrors.pincode = 'Pincode must be 6 digits';
+      newErrors.pincode = "Pincode must be 6 digits";
     }
-    if (formData.age && (formData.age < 1 || formData.age > 120)) {
-      newErrors.age = 'Please enter a valid age';
-    }
-  
+   
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-  
 
   // const handleSubmit = () => {
   //   if (validateForm()) {
@@ -131,10 +139,12 @@ const Home = () => {
     if (validateForm()) {
       try {
         const form = new FormData();
+        const dob = `${formData.dobYear}-${formData.dobMonth}-${formData.dobDay}`;
+
         form.append("fullname", formData.fullname);
         form.append("totalFamily", formData.totalFamily);
         form.append("gnati", formData.gnati);
-        form.append("age", formData.age);
+        form.append("age", dob);
         form.append("gender", formData.gender);
         form.append("category", formData.category);
         form.append("address", formData.address);
@@ -143,10 +153,8 @@ const Home = () => {
         form.append("mobile", formData.mobile);
         form.append("email", formData.email);
         form.append("website", formData.website);
-  
 
         if (formData.profileImage) {
-       
           if (formData.profileImage.startsWith("data:")) {
             const res = await fetch(formData.profileImage);
             const blob = await res.blob();
@@ -156,19 +164,24 @@ const Home = () => {
             form.append("profileImage", formData.profileImage);
           }
         }
-  
-        const response = await axios.post(`${BASE_URL}/api/createWebenquiry`, form, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        });
-  
+
+        const response = await axios.post(
+          `${BASE_URL}/api/createWebenquiry`,
+          form,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+
         console.log("API Response:", response.data);
-  
-        setAlertMessage("Registration submitted successfully! We will contact you soon.");
+
+        setAlertMessage(
+          "Registration submitted successfully! We will contact you soon."
+        );
         setAlertType("success");
         setShowAlert(true);
-  
 
         setFormData({
           fullname: "",
@@ -185,10 +198,12 @@ const Home = () => {
           website: "",
           profileImage: "",
         });
-  
       } catch (error) {
         console.error("API Error:", error);
-        setAlertMessage(error.response?.data?.message || "Something went wrong, please try again.");
+        setAlertMessage(
+          error.response?.data?.message ||
+            "Something went wrong, please try again."
+        );
         setAlertType("error");
         setShowAlert(true);
       }
@@ -198,6 +213,7 @@ const Home = () => {
       setShowAlert(true);
     }
   };
+
   const closeAlert = () => {
     setShowAlert(false);
   };
@@ -207,31 +223,65 @@ const Home = () => {
       {showAlert && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
           <div className="bg-white rounded-lg p-6 max-w-md w-full shadow-xl">
-            <div className={`flex items-center justify-center h-12 w-12 rounded-full ${alertType === 'success' ? 'bg-green-100' : 'bg-red-100'} mx-auto`}>
-              {alertType === 'success' ? (
-                <svg className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+            <div
+              className={`flex items-center justify-center h-12 w-12 rounded-full ${
+                alertType === "success" ? "bg-green-100" : "bg-red-100"
+              } mx-auto`}
+            >
+              {alertType === "success" ? (
+                <svg
+                  className="h-6 w-6 text-green-600"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M5 13l4 4L19 7"
+                  />
                 </svg>
               ) : (
-                <svg className="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                <svg
+                  className="h-6 w-6 text-red-600"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 </svg>
               )}
             </div>
             <div className="mt-3 text-center">
-              <h3 className={`text-lg font-medium ${alertType === 'success' ? 'text-green-800' : 'text-red-800'}`}>
-                {alertType === 'success' ? 'Success!' : 'Error!'}
+              <h3
+                className={`text-lg font-medium ${
+                  alertType === "success" ? "text-green-800" : "text-red-800"
+                }`}
+              >
+                {alertType === "success" ? "Success!" : "Error!"}
               </h3>
               <div className="mt-2 px-4">
-                <p className="text-sm text-gray-500">
-                  {alertMessage}
-                </p>
+                <p className="text-sm text-gray-500">{alertMessage}</p>
               </div>
             </div>
             <div className="mt-4 flex justify-center">
               <button
                 onClick={closeAlert}
-                className={`px-4 py-2 ${alertType === 'success' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'} text-white rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 ${alertType === 'success' ? 'focus:ring-green-500' : 'focus:ring-red-500'}`}
+                className={`px-4 py-2 ${
+                  alertType === "success"
+                    ? "bg-green-600 hover:bg-green-700"
+                    : "bg-red-600 hover:bg-red-700"
+                } text-white rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                  alertType === "success"
+                    ? "focus:ring-green-500"
+                    : "focus:ring-red-500"
+                }`}
               >
                 OK
               </button>
@@ -241,7 +291,7 @@ const Home = () => {
       )}
 
       {showCropper && (
-        <ImageCropper 
+        <ImageCropper
           onCropComplete={handleCropComplete}
           onCancel={handleCancelCrop}
         />
@@ -263,47 +313,56 @@ const Home = () => {
         <div className="max-w-6xl mx-auto">
           <div className="bg-white rounded-[0.4rem] shadow-2xl overflow-hidden">
             <div className="px-8 py-4">
-            <div className="flex items-center justify-center gap-4 mb-4">
-  {/* Logo */}
-  <img 
-    src="/logo-bg1.png" 
-    alt="Shri Bangalore Vaishnav Samaj Logo" 
-    className="w-16 h-16 object-contain -rotate-90"
-  />
+              <div className="flex items-center justify-center gap-4 mb-4">
+                {/* Logo */}
+                <img
+                  src="/logo-bg1.png"
+                  alt="Shri Bangalore Vaishnav Samaj Logo"
+                  className="w-16 h-16 object-contain -rotate-90"
+                />
 
-  {/* Title & Subtitle */}
-  <div className="text-left">
-    <h2 className="text-2xl font-bold text-transparent bg-orange-700 bg-clip-text mb-1">
-      Shri Bangalore Vaishnav Samaj
-    </h2>
-    <p className="text-gray-600">Please fill in your details to register</p>
-  </div>
-</div>
-
+                {/* Title & Subtitle */}
+                <div className="text-left">
+                  <h2 className="text-2xl font-bold text-transparent bg-orange-700 bg-clip-text mb-1">
+                    Shri Bangalore Vaishnav Samaj
+                  </h2>
+                  <p className="text-gray-600">
+                    Please fill your details to update membership data
+                  </p>
+                </div>
+              </div>
 
               <div className="space-y-2">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div>
-                    <label className="block text-sm font-medium text-amber-800 mb-3">Category</label>
+                    <label className="block text-sm font-medium text-amber-800 mb-3">
+                      Category
+                    </label>
                     <div className="flex space-x-1">
-                      {["Patron", "Dy Patron", "Life Membership"].map((category) => (
-                        <button
-                          key={category}
-                          type="button"
-                          onClick={() => handleTabSelect("category", category)}
-                          className={`flex-1 py-2 px-2 rounded-lg text-xs font-medium transition-all ${
-                            formData.category === category
-                              ? "bg-amber-500 text-white shadow-lg"
-                              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                          }`}
-                        >
-                          {category}
-                        </button>
-                      ))}
+                      {["Patron", "Dy Patron", "Life Membership"].map(
+                        (category) => (
+                          <button
+                            key={category}
+                            type="button"
+                            onClick={() =>
+                              handleTabSelect("category", category)
+                            }
+                            className={`flex-1 py-2 px-2 rounded-lg text-xs font-medium transition-all ${
+                              formData.category === category
+                                ? "bg-amber-500 text-white shadow-lg"
+                                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                            }`}
+                          >
+                            {category}
+                          </button>
+                        )
+                      )}
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-amber-800 mb-3">Gender *</label>
+                    <label className="block text-sm font-medium text-amber-800 mb-3">
+                      Gender *
+                    </label>
                     <div className="flex space-x-2">
                       {["Male", "Female"].map((gender) => (
                         <button
@@ -320,24 +379,111 @@ const Home = () => {
                         </button>
                       ))}
                     </div>
-                    {errors.gender && <span className="text-xs text-red-500">{errors.gender}</span>}
+                    {errors.gender && (
+                      <span className="text-xs text-red-500">
+                        {errors.gender}
+                      </span>
+                    )}
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-amber-800 mb-2">Full Name *</label>
+                    <label className="block text-sm font-medium text-amber-800 mb-2">
+                      Full Name *
+                    </label>
                     <input
                       type="text"
                       name="fullname"
                       value={formData.fullname}
                       onChange={handleInputChange}
-                      className={`w-full px-4 py-3 border ${errors.fullname ? 'border-red-500' : 'border-gray-400/80'} rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors`}
+                      className={`w-full px-4 py-3 border ${
+                        errors.fullname
+                          ? "border-red-500"
+                          : "border-gray-400/80"
+                      } rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors`}
                       required
                     />
-                    {errors.fullname && <span className="text-xs text-red-500">{errors.fullname}</span>}
+                    {errors.fullname && (
+                      <span className="text-xs text-red-500">
+                        {errors.fullname}
+                      </span>
+                    )}
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   <div>
+                    <label className="block text-sm font-medium text-amber-800 mb-2">
+                      Date of Birth *
+                    </label>
+                    <div className="flex gap-0.5  ">
+                      {/* Day */}
+                      <select
+                        name="dobDay"
+                        value={formData.dobDay || ""}
+                        onChange={handleInputChange}
+                        className="flex-1 py-3  bg-white border border-gray-400/80 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors"
+                      >
+                        <option value="" >Day</option>
+                        {[...Array(31)].map((_, i) => (
+                          <option key={i + 1} value={i + 1}>
+                            {i + 1}
+                          </option>
+                        ))}
+                      </select>
+
+                      {/* Month */}
+                      <select
+                        name="dobMonth"
+                        value={formData.dobMonth || ""}
+                        onChange={handleInputChange}
+                        className="flex-1 px-3 py-2 bg-white border border-gray-400/80 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors"
+                      >
+                        <option value="">Month</option>
+                        {[
+                          "January",
+                          "February",
+                          "March",
+                          "April",
+                          "May",
+                          "June",
+                          "July",
+                          "August",
+                          "September",
+                          "October",
+                          "November",
+                          "December",
+                        ].map((month, index) => (
+                          <option key={index + 1} value={index + 1}>
+                            {month}
+                          </option>
+                        ))}
+                      </select>
+
+                      {/* Year */}
+                      <select
+                        name="dobYear"
+                        value={formData.dobYear || ""}
+                        onChange={handleInputChange}
+                        className="flex-1 px-3 py-2 bg-white border border-gray-400/80 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors"
+                      >
+                        <option value="" className="">
+                          Year
+                        </option>
+                        {Array.from(
+                          { length: 120 },
+                          (_, i) => new Date().getFullYear() - i
+                        ).map((year) => (
+                          <option key={year} value={year}>
+                            {year}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {errors.age && (
+                      <span className="text-xs text-red-500">{errors.age}</span>
+                    )}
+                  </div>
+                  {/* <div>
                     <label className="block text-sm font-medium text-amber-800 mb-2">DOB *</label>
                     <input
                       type="date"
@@ -348,21 +494,31 @@ const Home = () => {
                       required
                     />
                     {errors.age && <span className="text-xs text-red-500">{errors.age}</span>}
-                  </div>
+                  </div> */}
                   <div>
-                    <label className="block text-sm font-medium text-amber-800 mb-2">Gnati *</label>
+                    <label className="block text-sm font-medium text-amber-800 mb-2">
+                      Gnati *
+                    </label>
                     <input
                       type="text"
                       name="gnati"
                       value={formData.gnati}
                       onChange={handleInputChange}
-                      className={`w-full px-4 py-3 border ${errors.gnati ? 'border-red-500' : 'border-gray-400/80'} rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors`}
+                      className={`w-full px-4 py-3 border ${
+                        errors.gnati ? "border-red-500" : "border-gray-400/80"
+                      } rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors`}
                       required
                     />
-                    {errors.gnati && <span className="text-xs text-red-500">{errors.gnati}</span>}
+                    {errors.gnati && (
+                      <span className="text-xs text-red-500">
+                        {errors.gnati}
+                      </span>
+                    )}
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-amber-800 mb-2">Mobile Number *</label>
+                    <label className="block text-sm font-medium text-amber-800 mb-2">
+                      Mobile Number *
+                    </label>
                     <input
                       type="tel"
                       name="mobile"
@@ -370,28 +526,44 @@ const Home = () => {
                       onChange={handleInputChange}
                       onKeyDown={keyDown}
                       maxLength="10"
-                      className={`w-full px-4 py-3 border ${errors.mobile ? 'border-red-500' : 'border-gray-400/80'} rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors`}
+                      className={`w-full px-4 py-3 border ${
+                        errors.mobile ? "border-red-500" : "border-gray-400/80"
+                      } rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors`}
                       required
                     />
-                    {errors.mobile && <span className="text-xs text-red-500">{errors.mobile}</span>}
+                    {errors.mobile && (
+                      <span className="text-xs text-red-500">
+                        {errors.mobile}
+                      </span>
+                    )}
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-amber-800 mb-2">Email Address *</label>
+                    <label className="block text-sm font-medium text-amber-800 mb-2">
+                      Email Address *
+                    </label>
                     <input
                       type="email"
                       name="email"
                       value={formData.email}
                       onChange={handleInputChange}
-                      className={`w-full px-4 py-3 border ${errors.email ? 'border-red-500' : 'border-gray-400/80'} rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors`}
+                      className={`w-full px-4 py-3 border ${
+                        errors.email ? "border-red-500" : "border-gray-400/80"
+                      } rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors`}
                       required
                     />
-                    {errors.email && <span className="text-xs text-red-500">{errors.email}</span>}
+                    {errors.email && (
+                      <span className="text-xs text-red-500">
+                        {errors.email}
+                      </span>
+                    )}
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className='col-span-1 md:col-span-2'>
-                    <label className="block text-sm font-medium text-amber-800 mb-2">Complete Address</label>
+                  <div className="col-span-1 md:col-span-2">
+                    <label className="block text-sm font-medium text-amber-800 mb-2">
+                      Complete Address
+                    </label>
                     <textarea
                       name="address"
                       value={formData.address}
@@ -401,18 +573,20 @@ const Home = () => {
                       placeholder="Enter your complete address..."
                     />
                   </div>
-                
+
                   <div>
-  <label className="block text-sm font-medium text-amber-800 mb-2">Profile Image *</label>
-  <div className="flex items-center space-x-4">
-    {formData.profileImage ? (
-      <div className="relative">
-        <img 
-          src={formData.profileImage} 
-          alt="Profile preview" 
-          className="w-24 h-24 rounded-full object-cover border-2 border-amber-500"
-        />
-        <button
+                    <label className="block text-sm font-medium text-amber-800 mb-2">
+                      Profile Image *
+                    </label>
+                    <div className="flex items-center space-x-4">
+                      {formData.profileImage ? (
+                        <div className="relative">
+                          <img
+                            src={formData.profileImage}
+                            alt="Profile preview"
+                            className="w-24 h-24 rounded-full object-cover border-2 border-amber-500"
+                          />
+                          {/* <button
           type="button"
           onClick={() => {
             setFormData(prev => ({...prev, profileImage: ''}));
@@ -420,30 +594,51 @@ const Home = () => {
           className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs"
         >
           ×
-        </button>
-      </div>
-    ) : (
-      <div className={`w-24 h-24 rounded-xl flex items-center justify-center border-2 border-dashed ${errors.profileImage ? 'border-red-500 bg-red-50' : 'border-yellow-800/20 bg-gray-200'}`}>
-        <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-        </svg>
-      </div>
-    )}
-    
-    <div>
-      <button
-        type="button"
-        onClick={() => setShowCropper(true)}
-        className="px-4 py-2 bg-amber-500 text-white rounded-lg cursor-pointer hover:bg-amber-600 transition-colors"
-      >
-        {formData.profileImage ? 'Change Image' : 'Upload Image'}
-      </button>
-    </div>
-  </div>
-  {errors.profileImage && <span className="text-xs text-red-500">{errors.profileImage}</span>}
-</div>
+        </button> */}
+                        </div>
+                      ) : (
+                        <div
+                          className={`w-24 h-24 rounded-xl flex items-center justify-center border-2 border-dashed ${
+                            errors.profileImage
+                              ? "border-red-500 bg-red-50"
+                              : "border-yellow-800/20 bg-gray-200"
+                          }`}
+                        >
+                          <svg
+                            className="w-8 h-8 text-gray-400"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2"
+                              d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                            ></path>
+                          </svg>
+                        </div>
+                      )}
 
-              
+                      <div>
+                        <button
+                          type="button"
+                          onClick={() => setShowCropper(true)}
+                          className="px-4 py-2 bg-amber-500 text-white rounded-lg cursor-pointer hover:bg-amber-600 transition-colors"
+                        >
+                          {formData.profileImage
+                            ? "Change Image"
+                            : "Upload Image"}
+                        </button>
+                      </div>
+                    </div>
+                    {errors.profileImage && (
+                      <span className="text-xs text-red-500">
+                        {errors.profileImage}
+                      </span>
+                    )}
+                  </div>
+
                   {/* <div className='flex flex-col gap-4'>
                     <div>
                       <label className="block text-sm font-medium text-amber-800 mb-2">Pincode </label>
@@ -475,7 +670,6 @@ const Home = () => {
                 </div>
 
                 {/* Image Upload Section */}
-             
 
                 <div className="flex justify-center pt-2">
                   <button
@@ -483,10 +677,20 @@ const Home = () => {
                     onClick={handleSubmit}
                     className="px-6 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold text-[1rem] rounded-md hover:from-amber-600 hover:to-orange-600 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
                   >
-                    Submit Registration
+                    Submit
                   </button>
                 </div>
               </div>
+              <p className="text-gray-600 text-center mt-4 text-sm">
+                If you face any difficulty, please contact{" "}
+                <a
+                  href="tel:+918867171061"
+                  className="text-blue-600 font-medium hover:underline"
+                >
+                  +91 8867171061
+                </a>
+                .
+              </p>
             </div>
           </div>
         </div>
