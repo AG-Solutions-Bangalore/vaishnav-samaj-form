@@ -141,10 +141,10 @@ const Home = () => {
         const form = new FormData();
         const dob = `${formData.dobYear}-${formData.dobMonth}-${formData.dobDay}`;
 
-        form.append("fullname", formData.fullname);
+        form.append("name", formData.fullname);
         form.append("totalFamily", formData.totalFamily);
         form.append("gnati", formData.gnati);
-        form.append("age", dob);
+        form.append("user_dob", dob);
         form.append("gender", formData.gender);
         form.append("category", formData.category);
         form.append("address", formData.address);
@@ -159,9 +159,9 @@ const Home = () => {
             const res = await fetch(formData.profileImage);
             const blob = await res.blob();
             const file = new File([blob], "profile.jpg", { type: blob.type });
-            form.append("profileImage", file);
+            form.append("user_image", file);
           } else {
-            form.append("profileImage", formData.profileImage);
+            form.append("user_image", formData.profileImage);
           }
         }
 
