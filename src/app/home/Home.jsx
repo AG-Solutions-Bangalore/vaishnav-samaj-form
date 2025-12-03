@@ -1,3 +1,4 @@
+
 import ImageCropper from "@/components/ImageCropper";
 import BASE_URL from "@/config/BaseUrl";
 import axios from "axios";
@@ -11,8 +12,6 @@ const Home = () => {
     dobDay: '',
     dobMonth: '',
     dobYear: '',
-
-    // age: "",
     gender: "Male",
     category: "Patron",
     address: "",
@@ -21,7 +20,6 @@ const Home = () => {
     mobile: "",
     email: "",
     website: "",
-
     profileImage: "",
   });
 
@@ -31,6 +29,7 @@ const Home = () => {
   const [alertType, setAlertType] = useState("");
   const [showCropper, setShowCropper] = useState(false);
   const [tempImage, setTempImage] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false); // New loading state
 
   const keyDown = (e) => {
     if (
@@ -117,100 +116,110 @@ const Home = () => {
     if (formData.pincode && !/^\d{6}$/.test(formData.pincode)) {
       newErrors.pincode = "Pincode must be 6 digits";
     }
-   
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  // const handleSubmit = () => {
-  //   if (validateForm()) {
-  //     console.log("Form Data:", formData);
-  //     setAlertMessage("Registration submitted successfully! We will contact you soon.");
-  //     setAlertType('success');
-  //     setShowAlert(true);
-  //   } else {
-  //     setAlertMessage("Please fix the errors in the form before submitting.");
-  //     setAlertType('error');
-  //     setShowAlert(true);
-  //   }
-  // };
   const handleSubmit = async () => {
-    if (validateForm()) {
-      try {
-        const form = new FormData();
-        const dob = `${formData.dobYear}-${formData.dobMonth}-${formData.dobDay}`;
-
-        form.append("name", formData.fullname);
-        form.append("totalFamily", formData.totalFamily);
-        form.append("gnati", formData.gnati);
-        form.append("user_dob", dob);
-        form.append("gender", formData.gender);
-        form.append("category", formData.category);
-        form.append("address", formData.address);
-        form.append("pincode", formData.pincode);
-        form.append("telephone", formData.telephone);
-        form.append("mobile", formData.mobile);
-        form.append("email", formData.email);
-        form.append("website", formData.website);
-
-        if (formData.profileImage) {
-          if (formData.profileImage.startsWith("data:")) {
-            const res = await fetch(formData.profileImage);
-            const blob = await res.blob();
-            const file = new File([blob], "profile.jpg", { type: blob.type });
-            form.append("user_image", file);
-          } else {
-            form.append("user_image", formData.profileImage);
-          }
-        }
-
-        const response = await axios.post(
-          `${BASE_URL}/api/createWebenquiry`,
-          form,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          }
-        );
-
-        console.log("API Response:", response.data);
-
-        setAlertMessage(
-          "Registration submitted successfully! We will contact you soon."
-        );
-        setAlertType("success");
-        setShowAlert(true);
-
-        setFormData({
-          fullname: "",
-          totalFamily: "",
-          gnati: "",
-          age: "",
-          gender: "Male",
-          category: "Donor",
-          address: "",
-          pincode: "",
-          telephone: "",
-          mobile: "",
-          email: "",
-          website: "",
-          profileImage: "",
-        });
-      } catch (error) {
-        console.error("API Error:", error);
-        setAlertMessage(
-          error.response?.data?.message ||
-            "Something went wrong, please try again."
-        );
-        setAlertType("error");
-        setShowAlert(true);
-      }
-    } else {
+    if (!validateForm()) {
       setAlertMessage("Please fix the errors in the form before submitting.");
       setAlertType("error");
       setShowAlert(true);
+      return;
+    }
+
+    setIsSubmitting(true); // Start loading
+
+    try {
+      const form = new FormData();
+      const dob = `${formData.dobYear}-${formData.dobMonth}-${formData.dobDay}`;
+
+      form.append("name", formData.fullname);
+      form.append("totalFamily", formData.totalFamily);
+      form.append("gnati", formData.gnati);
+      form.append("user_dob", dob);
+      form.append("gender", formData.gender);
+      form.append("category", formData.category);
+      form.append("address", formData.address);
+      form.append("pincode", formData.pincode);
+      form.append("telephone", formData.telephone);
+      form.append("mobile", formData.mobile);
+      form.append("email", formData.email);
+      form.append("website", formData.website);
+
+      if (formData.profileImage) {
+        if (formData.profileImage.startsWith("data:")) {
+          const res = await fetch(formData.profileImage);
+          const blob = await res.blob();
+          const file = new File([blob], "profile.jpg", { type: blob.type });
+          form.append("user_image", file);
+        } else {
+          form.append("user_image", formData.profileImage);
+        }
+      }
+
+      const response = await axios.post(
+        `${BASE_URL}/api/createWebenquiry`,
+        form,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      console.log("API Response:", response.data);
+
+      setAlertMessage(
+        "Registration submitted successfully! We will contact you soon."
+      );
+      setAlertType("success");
+      setShowAlert(true);
+
+
+      setFormData({
+        fullname: "",
+        totalFamily: "",
+        gnati: "",
+        dobDay: '',
+        dobMonth: '',
+        dobYear: '',
+        gender: "Male",
+        category: "Patron",
+        address: "",
+        pincode: "",
+        telephone: "",
+        mobile: "",
+        email: "",
+        website: "",
+        profileImage: "",
+      });
+
+    } catch (error) {
+      console.error("API Error:", error);
+      
+      let errorMessage = "Something went wrong, please try again.";
+      
+      if (error.response) {
+      
+        errorMessage = error.response.data?.message || 
+                      error.response.data?.error || 
+                      `Server error: ${error.response.status}`;
+      } else if (error.request) {
+       
+        errorMessage = "Network error. Please check your connection and try again.";
+      } else {
+
+        errorMessage = error.message || "An unexpected error occurred.";
+      }
+      
+      setAlertMessage(errorMessage);
+      setAlertType("error");
+      setShowAlert(true);
+      
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -316,9 +325,9 @@ const Home = () => {
               <div className="flex items-center justify-center gap-4 mb-4">
                 {/* Logo */}
                 <img
-                  src="/logo-bg1.png"
+                  src="/logo-bg2.png"
                   alt="Shri Bangalore Vaishnav Samaj Logo"
-                  className="w-16 h-16 object-contain -rotate-90"
+                  className="w-16 h-16 object-contain "
                 />
 
                 {/* Title & Subtitle */}
@@ -400,6 +409,7 @@ const Home = () => {
                           : "border-gray-400/80"
                       } rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors`}
                       required
+                      disabled={isSubmitting}
                     />
                     {errors.fullname && (
                       <span className="text-xs text-red-500">
@@ -414,15 +424,16 @@ const Home = () => {
                     <label className="block text-sm font-medium text-amber-800 mb-2">
                       Date of Birth *
                     </label>
-                    <div className="flex gap-0.5  ">
+                    <div className="flex gap-0.5">
                       {/* Day */}
                       <select
                         name="dobDay"
                         value={formData.dobDay || ""}
                         onChange={handleInputChange}
-                        className="flex-1 py-3  bg-white border border-gray-400/80 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors"
+                        className="flex-1 py-3 bg-white border border-gray-400/80 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors"
+                        disabled={isSubmitting}
                       >
-                        <option value="" >Day</option>
+                        <option value="">Day</option>
                         {[...Array(31)].map((_, i) => (
                           <option key={i + 1} value={i + 1}>
                             {i + 1}
@@ -436,6 +447,7 @@ const Home = () => {
                         value={formData.dobMonth || ""}
                         onChange={handleInputChange}
                         className="flex-1 px-3 py-2 bg-white border border-gray-400/80 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors"
+                        disabled={isSubmitting}
                       >
                         <option value="">Month</option>
                         {[
@@ -464,10 +476,9 @@ const Home = () => {
                         value={formData.dobYear || ""}
                         onChange={handleInputChange}
                         className="flex-1 px-3 py-2 bg-white border border-gray-400/80 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors"
+                        disabled={isSubmitting}
                       >
-                        <option value="" className="">
-                          Year
-                        </option>
+                        <option value="">Year</option>
                         {Array.from(
                           { length: 120 },
                           (_, i) => new Date().getFullYear() - i
@@ -483,18 +494,6 @@ const Home = () => {
                       <span className="text-xs text-red-500">{errors.age}</span>
                     )}
                   </div>
-                  {/* <div>
-                    <label className="block text-sm font-medium text-amber-800 mb-2">DOB *</label>
-                    <input
-                      type="date"
-                      name="age"
-                      value={formData.age}
-                      onChange={handleInputChange}
-                      className={`w-full px-4 py-3 border ${errors.age ? 'border-red-500' : 'border-gray-400/80'} rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors`}
-                      required
-                    />
-                    {errors.age && <span className="text-xs text-red-500">{errors.age}</span>}
-                  </div> */}
                   <div>
                     <label className="block text-sm font-medium text-amber-800 mb-2">
                       Gnati *
@@ -508,6 +507,7 @@ const Home = () => {
                         errors.gnati ? "border-red-500" : "border-gray-400/80"
                       } rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors`}
                       required
+                      disabled={isSubmitting}
                     />
                     {errors.gnati && (
                       <span className="text-xs text-red-500">
@@ -530,6 +530,7 @@ const Home = () => {
                         errors.mobile ? "border-red-500" : "border-gray-400/80"
                       } rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors`}
                       required
+                      disabled={isSubmitting}
                     />
                     {errors.mobile && (
                       <span className="text-xs text-red-500">
@@ -550,6 +551,7 @@ const Home = () => {
                         errors.email ? "border-red-500" : "border-gray-400/80"
                       } rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors`}
                       required
+                      disabled={isSubmitting}
                     />
                     {errors.email && (
                       <span className="text-xs text-red-500">
@@ -571,6 +573,7 @@ const Home = () => {
                       rows="5"
                       className="w-full px-4 py-3 border border-gray-400/80 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors resize-none"
                       placeholder="Enter your complete address..."
+                      disabled={isSubmitting}
                     />
                   </div>
 
@@ -586,15 +589,6 @@ const Home = () => {
                             alt="Profile preview"
                             className="w-24 h-24 rounded-full object-cover border-2 border-amber-500"
                           />
-                          {/* <button
-          type="button"
-          onClick={() => {
-            setFormData(prev => ({...prev, profileImage: ''}));
-          }}
-          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs"
-        >
-          ×
-        </button> */}
                         </div>
                       ) : (
                         <div
@@ -624,7 +618,8 @@ const Home = () => {
                         <button
                           type="button"
                           onClick={() => setShowCropper(true)}
-                          className="px-4 py-2 bg-amber-500 text-white rounded-lg cursor-pointer hover:bg-amber-600 transition-colors"
+                          className="px-4 py-2 bg-amber-500 text-white rounded-lg cursor-pointer hover:bg-amber-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          disabled={isSubmitting}
                         >
                           {formData.profileImage
                             ? "Change Image"
@@ -638,46 +633,46 @@ const Home = () => {
                       </span>
                     )}
                   </div>
-
-                  {/* <div className='flex flex-col gap-4'>
-                    <div>
-                      <label className="block text-sm font-medium text-amber-800 mb-2">Pincode </label>
-                      <input
-                        type="tel"
-                        name="pincode"
-                        value={formData.pincode}
-                        onChange={handleInputChange}
-                        onKeyDown={keyDown}
-                        maxLength="6"
-                        className={`w-full px-4 py-3 border ${errors.pincode ? 'border-red-500' : 'border-gray-400/80'} rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors`}
-                        required
-                      />
-              
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-amber-800 mb-2">Total Family Members </label>
-                      <input
-                        type="tel"
-                        name="totalFamily"
-                        value={formData.totalFamily}
-                        onChange={handleInputChange}
-                        onKeyDown={keyDown}
-                        className={`w-full px-4 py-3 border ${errors.totalFamily ? 'border-red-500' : 'border-gray-400/80'} rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors`}
-                      />
-                    </div>
-                  </div> */}
                 </div>
-
-                {/* Image Upload Section */}
 
                 <div className="flex justify-center pt-2">
                   <button
                     type="button"
                     onClick={handleSubmit}
-                    className="px-6 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold text-[1rem] rounded-md hover:from-amber-600 hover:to-orange-600 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
+                    disabled={isSubmitting}
+                    className={`px-6 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold text-[1rem] rounded-md transform transition-all duration-200 shadow-lg flex items-center justify-center min-w-[120px] ${
+                      isSubmitting 
+                        ? 'opacity-70 cursor-not-allowed' 
+                        : 'hover:from-amber-600 hover:to-orange-600 hover:scale-105 hover:shadow-xl'
+                    }`}
                   >
-                    Submit
+                    {isSubmitting ? (
+                      <>
+                        <svg 
+                          className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" 
+                          xmlns="http://www.w3.org/2000/svg" 
+                          fill="none" 
+                          viewBox="0 0 24 24"
+                        >
+                          <circle 
+                            className="opacity-25" 
+                            cx="12" 
+                            cy="12" 
+                            r="10" 
+                            stroke="currentColor" 
+                            strokeWidth="4"
+                          ></circle>
+                          <path 
+                            className="opacity-75" 
+                            fill="currentColor" 
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          ></path>
+                        </svg>
+                        Submitting...
+                      </>
+                    ) : (
+                      'Submit'
+                    )}
                   </button>
                 </div>
               </div>
