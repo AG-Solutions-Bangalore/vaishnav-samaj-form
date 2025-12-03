@@ -13,7 +13,7 @@ const Home = () => {
     dobMonth: '',
     dobYear: '',
     gender: "Male",
-    category: "Patron",
+    category: "",
     address: "",
     pincode: "",
     telephone: "",
@@ -343,6 +343,8 @@ const Home = () => {
 
               <div className="space-y-2">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+                {/*
                   <div>
                     <label className="block text-sm font-medium text-amber-800 mb-3">
                       Category
@@ -367,6 +369,51 @@ const Home = () => {
                         )
                       )}
                     </div>
+                  </div>
+                   */}
+                       <div>
+                    <label className="block text-sm font-medium text-amber-800 mb-2">
+                      Full Name *
+                    </label>
+                    <input
+                      type="text"
+                      name="fullname"
+                      value={formData.fullname}
+                      onChange={handleInputChange}
+                      className={`w-full px-4 py-3 border ${
+                        errors.fullname
+                          ? "border-red-500"
+                          : "border-gray-400/80"
+                      } rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors`}
+                      required
+                      disabled={isSubmitting}
+                    />
+                    {errors.fullname && (
+                      <span className="text-xs text-red-500">
+                        {errors.fullname}
+                      </span>
+                    )}
+                  </div>
+                      <div>
+                    <label className="block text-sm font-medium text-amber-800 mb-2">
+                      Gnati *
+                    </label>
+                    <input
+                      type="text"
+                      name="gnati"
+                      value={formData.gnati}
+                      onChange={handleInputChange}
+                      className={`w-full px-4 py-3 border ${
+                        errors.gnati ? "border-red-500" : "border-gray-400/80"
+                      } rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors`}
+                      required
+                      disabled={isSubmitting}
+                    />
+                    {errors.gnati && (
+                      <span className="text-xs text-red-500">
+                        {errors.gnati}
+                      </span>
+                    )}
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-amber-800 mb-3">
@@ -394,32 +441,10 @@ const Home = () => {
                       </span>
                     )}
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-amber-800 mb-2">
-                      Full Name *
-                    </label>
-                    <input
-                      type="text"
-                      name="fullname"
-                      value={formData.fullname}
-                      onChange={handleInputChange}
-                      className={`w-full px-4 py-3 border ${
-                        errors.fullname
-                          ? "border-red-500"
-                          : "border-gray-400/80"
-                      } rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors`}
-                      required
-                      disabled={isSubmitting}
-                    />
-                    {errors.fullname && (
-                      <span className="text-xs text-red-500">
-                        {errors.fullname}
-                      </span>
-                    )}
-                  </div>
+              
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-amber-800 mb-2">
                       Date of Birth *
@@ -494,27 +519,7 @@ const Home = () => {
                       <span className="text-xs text-red-500">{errors.age}</span>
                     )}
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-amber-800 mb-2">
-                      Gnati *
-                    </label>
-                    <input
-                      type="text"
-                      name="gnati"
-                      value={formData.gnati}
-                      onChange={handleInputChange}
-                      className={`w-full px-4 py-3 border ${
-                        errors.gnati ? "border-red-500" : "border-gray-400/80"
-                      } rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors`}
-                      required
-                      disabled={isSubmitting}
-                    />
-                    {errors.gnati && (
-                      <span className="text-xs text-red-500">
-                        {errors.gnati}
-                      </span>
-                    )}
-                  </div>
+               
                   <div>
                     <label className="block text-sm font-medium text-amber-800 mb-2">
                       Mobile Number *
