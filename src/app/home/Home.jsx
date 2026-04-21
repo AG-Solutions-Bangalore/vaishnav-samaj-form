@@ -1,4 +1,3 @@
-
 import ImageCropper from "@/components/ImageCropper";
 import BASE_URL from "@/config/BaseUrl";
 import axios from "axios";
@@ -9,9 +8,9 @@ const Home = () => {
     fullname: "",
     totalFamily: "",
     gnati: "",
-    dobDay: '',
-    dobMonth: '',
-    dobYear: '',
+    dobDay: "",
+    dobMonth: "",
+    dobYear: "",
     gender: "Male",
     category: "",
     address: "",
@@ -21,6 +20,8 @@ const Home = () => {
     email: "",
     website: "",
     profileImage: "",
+    haveReceipt: false,
+    receipt_no: "",
   });
 
   const [errors, setErrors] = useState({});
@@ -65,6 +66,22 @@ const Home = () => {
     }
   };
 
+  const handleCheckboxChange = (e) => {
+    const { name, checked } = e.target;
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: checked, // ✅ boolean only
+    }));
+
+    if (errors[name]) {
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        [name]: "",
+      }));
+    }
+  };
+
   const handleTabSelect = (field, value) => {
     setFormData((prevState) => ({
       ...prevState,
@@ -98,7 +115,7 @@ const Home = () => {
     if (!formData.dobDay || !formData.dobMonth || !formData.dobYear) {
       newErrors.age = "DOB is required";
     }
-    
+
     if (!formData.gender) newErrors.gender = "Gender is required";
     if (!formData.gnati.trim()) newErrors.gnati = "Gnati is required";
     if (!formData.mobile) newErrors.mobile = "Mobile number is required";
@@ -115,6 +132,9 @@ const Home = () => {
     }
     if (formData.pincode && !/^\d{6}$/.test(formData.pincode)) {
       newErrors.pincode = "Pincode must be 6 digits";
+    }
+    if (formData.haveReceipt && !formData.receipt_no) {
+      newErrors.receipt_no = "Receipt number is required";
     }
 
     setErrors(newErrors);
@@ -147,6 +167,8 @@ const Home = () => {
       form.append("mobile", formData.mobile);
       form.append("email", formData.email);
       form.append("website", formData.website);
+      form.append("haveReceipt", formData.haveReceipt ? "Yes" : "No");
+      form.append("receipt_no", formData.receipt_no);
 
       if (formData.profileImage) {
         if (formData.profileImage.startsWith("data:")) {
@@ -166,25 +188,24 @@ const Home = () => {
           headers: {
             "Content-Type": "multipart/form-data",
           },
-        }
+        },
       );
 
       console.log("API Response:", response.data);
 
       setAlertMessage(
-        "Registration submitted successfully! We will contact you soon."
+        "Registration submitted successfully! We will contact you soon.",
       );
       setAlertType("success");
       setShowAlert(true);
-
 
       setFormData({
         fullname: "",
         totalFamily: "",
         gnati: "",
-        dobDay: '',
-        dobMonth: '',
-        dobYear: '',
+        dobDay: "",
+        dobMonth: "",
+        dobYear: "",
         gender: "Male",
         category: "Patron",
         address: "",
@@ -194,30 +215,29 @@ const Home = () => {
         email: "",
         website: "",
         profileImage: "",
+        haveReceipt: false,
+        receipt_no: "",
       });
-
     } catch (error) {
       console.error("API Error:", error);
-      
-      let errorMessage = "Something went wrong, please try again.";
-      
-      if (error.response) {
-      
-        errorMessage = error.response.data?.message || 
-                      error.response.data?.error || 
-                      `Server error: ${error.response.status}`;
-      } else if (error.request) {
-       
-        errorMessage = "Network error. Please check your connection and try again.";
-      } else {
 
+      let errorMessage = "Something went wrong, please try again.";
+
+      if (error.response) {
+        errorMessage =
+          error.response.data?.message ||
+          error.response.data?.error ||
+          `Server error: ${error.response.status}`;
+      } else if (error.request) {
+        errorMessage =
+          "Network error. Please check your connection and try again.";
+      } else {
         errorMessage = error.message || "An unexpected error occurred.";
       }
-      
+
       setAlertMessage(errorMessage);
       setAlertType("error");
       setShowAlert(true);
-      
     } finally {
       setIsSubmitting(false);
     }
@@ -343,8 +363,7 @@ const Home = () => {
 
               <div className="space-y-2">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-
-                {/*
+                  {/*
                   <div>
                     <label className="block text-sm font-medium text-amber-800 mb-3">
                       Category
@@ -371,7 +390,7 @@ const Home = () => {
                     </div>
                   </div>
                    */}
-                       <div>
+                  <div>
                     <label className="block text-sm font-medium text-amber-800 mb-2">
                       Full Name *
                     </label>
@@ -394,7 +413,7 @@ const Home = () => {
                       </span>
                     )}
                   </div>
-                      <div>
+                  <div>
                     <label className="block text-sm font-medium text-amber-800 mb-2">
                       Gnati *
                     </label>
@@ -441,7 +460,6 @@ const Home = () => {
                       </span>
                     )}
                   </div>
-              
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -506,7 +524,7 @@ const Home = () => {
                         <option value="">Year</option>
                         {Array.from(
                           { length: 120 },
-                          (_, i) => new Date().getFullYear() - i
+                          (_, i) => new Date().getFullYear() - i,
                         ).map((year) => (
                           <option key={year} value={year}>
                             {year}
@@ -519,7 +537,7 @@ const Home = () => {
                       <span className="text-xs text-red-500">{errors.age}</span>
                     )}
                   </div>
-               
+
                   <div>
                     <label className="block text-sm font-medium text-amber-800 mb-2">
                       Mobile Number *
@@ -581,7 +599,6 @@ const Home = () => {
                       disabled={isSubmitting}
                     />
                   </div>
-
                   <div>
                     <label className="block text-sm font-medium text-amber-800 mb-2">
                       Profile Image *
@@ -638,6 +655,51 @@ const Home = () => {
                       </span>
                     )}
                   </div>
+                  <div className="flex items-center gap-4">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        name="haveReceipt"
+                        checked={formData.haveReceipt}
+                        onChange={handleCheckboxChange}
+                        className="form-checkbox h-5 w-5 text-amber-600"
+                      />
+                      <span className="text-gray-700">
+                        Do you have a Receipt?
+                      </span>
+                    </label>
+                    {errors.haveReceipt && (
+                      <span className="text-xs text-red-500">
+                        {errors.haveReceipt}
+                      </span>
+                    )}
+                  </div>
+                  {formData.haveReceipt && (
+                    <div>
+                      {/* <label className="block text-sm font-medium text-amber-800 mb-2">
+                        Receipt Number *
+                      </label> */}
+                      <input
+                        type="text"
+                        name="receipt_no"
+                        value={formData.receipt_no}
+                        onChange={handleInputChange}
+                        placeholder="Enter receipt number"
+                        className={`w-full px-4 py-3 border ${
+                          errors.receipt_no
+                            ? "border-red-500"
+                            : "border-gray-400/80"
+                        } rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors`}
+                        required
+                        disabled={isSubmitting}
+                      />
+                      {errors.receipt_no && (
+                        <span className="text-xs text-red-500">
+                          {errors.receipt_no}
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex justify-center pt-2">
@@ -646,37 +708,37 @@ const Home = () => {
                     onClick={handleSubmit}
                     disabled={isSubmitting}
                     className={`px-6 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold text-[1rem] rounded-md transform transition-all duration-200 shadow-lg flex items-center justify-center min-w-[120px] ${
-                      isSubmitting 
-                        ? 'opacity-70 cursor-not-allowed' 
-                        : 'hover:from-amber-600 hover:to-orange-600 hover:scale-105 hover:shadow-xl'
+                      isSubmitting
+                        ? "opacity-70 cursor-not-allowed"
+                        : "hover:from-amber-600 hover:to-orange-600 hover:scale-105 hover:shadow-xl"
                     }`}
                   >
                     {isSubmitting ? (
                       <>
-                        <svg 
-                          className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" 
-                          xmlns="http://www.w3.org/2000/svg" 
-                          fill="none" 
+                        <svg
+                          className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
                           viewBox="0 0 24 24"
                         >
-                          <circle 
-                            className="opacity-25" 
-                            cx="12" 
-                            cy="12" 
-                            r="10" 
-                            stroke="currentColor" 
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
                             strokeWidth="4"
                           ></circle>
-                          <path 
-                            className="opacity-75" 
-                            fill="currentColor" 
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
                             d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                           ></path>
                         </svg>
                         Submitting...
                       </>
                     ) : (
-                      'Submit'
+                      "Submit"
                     )}
                   </button>
                 </div>
