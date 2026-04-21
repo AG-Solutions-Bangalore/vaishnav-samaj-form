@@ -20,7 +20,7 @@ const Home = () => {
     email: "",
     website: "",
     profileImage: "",
-    haveReceipt: false,
+    haveReceipt: "",
     receipt_no: "",
   });
 
@@ -52,26 +52,15 @@ const Home = () => {
   };
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
+    let { name, value } = e.target;
+
+    if (name === "receipt_no") {
+      value = value.replace(/[^0-9]/g, "");
+    }
+
     setFormData((prevState) => ({
       ...prevState,
       [name]: value,
-    }));
-
-    if (errors[name]) {
-      setErrors((prevErrors) => ({
-        ...prevErrors,
-        [name]: "",
-      }));
-    }
-  };
-
-  const handleCheckboxChange = (e) => {
-    const { name, checked } = e.target;
-
-    setFormData((prev) => ({
-      ...prev,
-      [name]: checked, // ✅ boolean only
     }));
 
     if (errors[name]) {
@@ -133,9 +122,6 @@ const Home = () => {
     if (formData.pincode && !/^\d{6}$/.test(formData.pincode)) {
       newErrors.pincode = "Pincode must be 6 digits";
     }
-    if (formData.haveReceipt && !formData.receipt_no) {
-      newErrors.receipt_no = "Receipt number is required";
-    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -167,7 +153,6 @@ const Home = () => {
       form.append("mobile", formData.mobile);
       form.append("email", formData.email);
       form.append("website", formData.website);
-      form.append("haveReceipt", formData.haveReceipt ? "Yes" : "No");
       form.append("receipt_no", formData.receipt_no);
 
       if (formData.profileImage) {
@@ -215,7 +200,7 @@ const Home = () => {
         email: "",
         website: "",
         profileImage: "",
-        haveReceipt: false,
+        haveReceipt: "",
         receipt_no: "",
       });
     } catch (error) {
@@ -473,7 +458,7 @@ const Home = () => {
                         name="dobDay"
                         value={formData.dobDay || ""}
                         onChange={handleInputChange}
-                        className="flex-1 py-3 bg-white border border-gray-400/80 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors"
+                        className="flex-1 px-2 py-3 bg-white border border-gray-400/80 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors"
                         disabled={isSubmitting}
                       >
                         <option value="">Day</option>
@@ -489,7 +474,7 @@ const Home = () => {
                         name="dobMonth"
                         value={formData.dobMonth || ""}
                         onChange={handleInputChange}
-                        className="flex-1 px-3 py-2 bg-white border border-gray-400/80 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors"
+                        className="flex-1 px-2 py-2 bg-white border border-gray-400/80 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors"
                         disabled={isSubmitting}
                       >
                         <option value="">Month</option>
@@ -518,7 +503,7 @@ const Home = () => {
                         name="dobYear"
                         value={formData.dobYear || ""}
                         onChange={handleInputChange}
-                        className="flex-1 px-3 py-2 bg-white border border-gray-400/80 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors"
+                        className="flex-1 px-2 py-2 bg-white border border-gray-400/80 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors"
                         disabled={isSubmitting}
                       >
                         <option value="">Year</option>
@@ -655,104 +640,81 @@ const Home = () => {
                       </span>
                     )}
                   </div>
-                  <div className="flex items-center gap-4">
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        name="haveReceipt"
-                        checked={formData.haveReceipt}
-                        onChange={handleCheckboxChange}
-                        className="form-checkbox h-5 w-5 text-amber-600"
-                      />
-                      <span className="text-gray-700">
-                        Do you have a Receipt?
-                      </span>
-                    </label>
-                    {errors.haveReceipt && (
-                      <span className="text-xs text-red-500">
-                        {errors.haveReceipt}
-                      </span>
-                    )}
-                  </div>
-                  {formData.haveReceipt && (
-                    <div>
-                      {/* <label className="block text-sm font-medium text-amber-800 mb-2">
-                        Receipt Number *
-                      </label> */}
-                      <input
-                        type="text"
-                        name="receipt_no"
-                        value={formData.receipt_no}
-                        onChange={handleInputChange}
-                        placeholder="Enter receipt number"
-                        className={`w-full px-4 py-3 border ${
-                          errors.receipt_no
-                            ? "border-red-500"
-                            : "border-gray-400/80"
-                        } rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors`}
-                        required
-                        disabled={isSubmitting}
-                      />
-                      {errors.receipt_no && (
-                        <span className="text-xs text-red-500">
-                          {errors.receipt_no}
-                        </span>
-                      )}
-                    </div>
-                  )}
-                </div>
 
-                <div className="flex justify-center pt-2">
-                  <button
-                    type="button"
-                    onClick={handleSubmit}
-                    disabled={isSubmitting}
-                    className={`px-6 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold text-[1rem] rounded-md transform transition-all duration-200 shadow-lg flex items-center justify-center min-w-[120px] ${
-                      isSubmitting
-                        ? "opacity-70 cursor-not-allowed"
-                        : "hover:from-amber-600 hover:to-orange-600 hover:scale-105 hover:shadow-xl"
-                    }`}
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <svg
-                          className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                        >
-                          <circle
-                            className="opacity-25"
-                            cx="12"
-                            cy="12"
-                            r="10"
-                            stroke="currentColor"
-                            strokeWidth="4"
-                          ></circle>
-                          <path
-                            className="opacity-75"
-                            fill="currentColor"
-                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                          ></path>
-                        </svg>
-                        Submitting...
-                      </>
-                    ) : (
-                      "Submit"
-                    )}
-                  </button>
+                  <div className="w-full md:w-3/4">
+                    <label className="block text-sm font-medium text-amber-800 mb-2">
+                      Receipt Number (if you have)
+                    </label>
+                    <input
+                      type="text"
+                      name="receipt_no"
+                      value={formData.receipt_no}
+                      onChange={handleInputChange}
+                      onKeyDown={keyDown}
+                      placeholder="Enter receipt number"
+                      className={`w-full px-4 py-3 border ${
+                        errors.receipt_no
+                          ? "border-red-500"
+                          : "border-gray-400/80"
+                      } rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors`}
+                      required
+                      disabled={isSubmitting}
+                    />
+                  </div>
+
+                  <div className="flex flex-col justify-center items-center h-100">
+                    <button
+                      type="button"
+                      onClick={handleSubmit}
+                      disabled={isSubmitting}
+                      className={`px-6 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold text-[1rem] rounded-md transform transition-all duration-200 shadow-lg flex items-center justify-center min-w-[120px] ${
+                        isSubmitting
+                          ? "opacity-70 cursor-not-allowed"
+                          : "hover:from-amber-600 hover:to-orange-600 hover:scale-105 hover:shadow-xl"
+                      }`}
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <svg
+                            className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                          >
+                            <circle
+                              className="opacity-25"
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                            ></circle>
+                            <path
+                              className="opacity-75"
+                              fill="currentColor"
+                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                            ></path>
+                          </svg>
+                          Submitting...
+                        </>
+                      ) : (
+                        "Submit"
+                      )}
+                    </button>
+                    <p className="text-gray-600 text-center mt-4 text-sm">
+                      If you face any difficulty, please contact
+                      <br />
+                      <a
+                        href="tel:+918867171061"
+                        className="text-blue-600 font-medium hover:underline"
+                      >
+                        +91 8867171061
+                      </a>
+                      .
+                    </p>
+                  </div>
                 </div>
               </div>
-              <p className="text-gray-600 text-center mt-4 text-sm">
-                If you face any difficulty, please contact{" "}
-                <a
-                  href="tel:+918867171061"
-                  className="text-blue-600 font-medium hover:underline"
-                >
-                  +91 8867171061
-                </a>
-                .
-              </p>
             </div>
           </div>
         </div>
